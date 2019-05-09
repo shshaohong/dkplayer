@@ -1,0 +1,102 @@
+apply plugin: 'com.android.application'
+
+static def releaseTime() {
+    return new Date().format("yyyy_MM_dd", TimeZone.getTimeZone("UTC"))
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.dueeeke.dkplayer"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 30
+        versionName PUBLISH_VERSION
+
+        ndk {
+            //打包时保留armeabi-v7a x86 so
+            abiFilters "armeabi-v7a", "x86"
+        }
+    }
+
+
+    signingConfigs {
+        release {
+            storeFile file("../devlin.jks")
+            storePassword KEYSTORE_PWD
+            keyAlias KEY_ALIAS
+            keyPassword KEY_PWD
+        }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
+
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.release
+            zipAlignEnabled false
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            signingConfig signingConfigs.release
+            zipAlignEnabled true
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "${variant.name}-${variant.versionName}-${releaseTime()}(${variant.versionCode}).apk"
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
+    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.yanzhenjie:permission:2.0.0-rc12'
+    implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
+    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
+    implementation "com.android.support:design:$rootProject.supportLibraryVersion"
+    implementation 'com.google.android.exoplayer:exoplayer:2.8.2'
+    implementation 'com.google.android.exoplayer:extension-rtmp:2.8.2'
+    //缓存
+    implementation 'com.danikula:videocache:2.7.1'
+
+
+    implementation project(':dkplayer-java')
+    implementation project(':dkplayer-ui')
+    implementation project(':dkplayer-armv7a')
+    implementation project(':dkplayer-arm64')
+    implementation project(':dkplayer-armv5')
+    implementation project(':dkplayer-x86')
+    implementation project(':dkplayer-x86_64')
+//    implementation 'com.github.dueeeke.dkplayer:dkplayer-java:2.5.5'
+//    implementation 'com.github.dueeeke.dkplayer:dkplayer-armv7a:2.5.5'
+//    implementation 'com.github.dueeeke.dkplayer:dkplayer-armv5:2.5.5'
+//    implementation 'com.github.dueeeke.dkplayer:dkplayer-arm64:2.5.5'
+//    implementation 'com.github.dueeeke.dkplayer:dkplayer-x86:2.5.5'
+//    implementation 'com.github.dueeeke.dkplayer:dkplayer-x86_64:2.5.5'
+//    implementation 'com.github.dueeeke.dkplayer:dkplayer-ui:2.5.5'
+}
